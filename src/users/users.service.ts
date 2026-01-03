@@ -9,7 +9,7 @@ import * as bcrypt from 'bcrypt';
 type CreateUserInternal = {
     username: string;
     email: string;
-    passwordEncoded: string;
+    passwordHashed: string;
     picture?: string | null;
 }
 
@@ -18,19 +18,14 @@ type CreateUserInternal = {
 export class UsersService {
     private users: User[] = [];
 
-
-    findWholeUser(id: string): User | undefined{
-        return this.users.find(u => u.id === id);
-    }
-
-    findAll(): Omit<User, 'passwordEncoded'>[]{
-        return this.users.map(({passwordEncoded, ...cleanUser}) => cleanUser);
+    findAll(): Omit<User, 'passwordHashed'>[]{
+        return this.users.map(({passwordHashed, ...cleanUser}) => cleanUser);
     }
     
-    findOne(id: string): Omit<User, 'passwordEncoded'>{
+    findOne(id: string): Omit<User, 'passwordHashed'>{
         const user = this.users.find(u => u.id === id);
         if (!user) throw new NotFoundException(`User with id ${id} not found.`);
-        const {passwordEncoded, ...cleanUser} = user;
+        const {passwordHashed, ...cleanUser} = user;
         return cleanUser;
     }
 
@@ -42,7 +37,7 @@ export class UsersService {
         return this.users.find(u => u.username.toLowerCase() === username.toLowerCase());
     }
 
-    async create(dto: CreateUserDto): Promise<Omit<User, 'passwordEncoded'>>{
+    async create(dto: CreateUserDto): Promise<Omit<User, 'passwordHashed'>>{
         if(this.findByEmail(dto.email)){
             throw new ConflictException("Email already exists");
         }
@@ -51,33 +46,28 @@ export class UsersService {
             throw new ConflictException("Username already exists");
         }
 
-        const passwordEncoded = await bcrypt.hash(dto.password, 10);
+        const passwordHashed = await bcrypt.hash(dto.password, 10);
 
         const user = this.createInternal({
             username: dto.username,
             email: dto.email,
-            passwordEncoded,
+            passwordHashed,
             picture: dto.picture,
         });
 
-        const {passwordEncoded: _, ...cleanUser} = user;
+        const {passwordHashed: _, ...cleanUser} = user;
         return cleanUser;
     }
 
 
-    createInternal(data: CreateUserInternal){
-        const existingMail = this.findByEmail(data.email);
-        const username = this.findByUsername(data.username);
-        if(existingMail) throw new ConflictException("Email already exists");
-        if(username) throw new ConflictException("Username already exists");
-        
+    createInternal(data: CreateUserInternal){        
         const now = new Date();
 
         const newUser: User = {
             id: randomUUID(),
             username: data.username,
             email: data.email,
-            passwordEncoded: data.passwordEncoded,
+            passwordHashed: data.passwordHashed,
             picture: data.picture ?? null,
             createdAt: now,
             updatedAt: now,

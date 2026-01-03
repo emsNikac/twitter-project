@@ -13,13 +13,8 @@ export class UsersController {
     }
 
     @Get(':id')
-    findById(@Param('id') id: string){
-        return this.usersService.findWholeUser(id);
-    }
-
-    @Post()
-    async create(@Body() userDto: CreateUserDto){
-        return this.usersService.create(userDto);
+    findOne(@Param('id') id: string){
+        return this.usersService.findOne(id);
     }
 
 }

@@ -13,29 +13,19 @@ export class AuthService {
     ){}
 
     async register(registerDto: RegisterDto){
-        const passwordEncoded = await bcrypt.hash(registerDto.password, 10);
-
-        const user = this.usersService.createInternal({
-            username: registerDto.username,
-            email: registerDto.email,
-            passwordEncoded,
-            picture: registerDto.picture ?? null,
-        });
-
+        const user = await this.usersService.create(registerDto);
         const token = await this.signToken(user.id, user.email);
-        const {passwordEncoded: _, ...cleanUser } = user;
-
-        return { user: cleanUser, access_token: token };
+        return { user, access_token: token };
     }
 
     async validateUser(email: string, password: string){
         const user = this.usersService.findByEmail(email);
         if(!user) return null;
 
-        const check_password = await  bcrypt.compare(password, user.passwordEncoded);
+        const check_password = await  bcrypt.compare(password, user.passwordHashed);
         if(!check_password) return null;
 
-        const {passwordEncoded: _, ...cleanUser} = user;
+        const {passwordHashed: _, ...cleanUser} = user;
         return cleanUser;
     }
 
@@ -51,7 +41,7 @@ export class AuthService {
     getUserFromTokenPayload(payload: { sub: string; email: string }){
         const user = this.usersService.findByEmail(payload.email);
         if(!user || user.id !== payload.sub) throw new UnauthorizedException();
-        const {passwordEncoded: _, ...cleanUser} = user;
+        const {passwordHashed: _, ...cleanUser} = user;
         return cleanUser; 
     }
 
