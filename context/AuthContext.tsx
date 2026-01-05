@@ -1,0 +1,67 @@
+import { createContext, useContext, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { loginRequest, registerRequest } from '../api/auth.api';
+
+type AuthContextType = {
+    isAuthenticated: boolean;
+    login: (email: string, password: string) => Promise<void>;
+    register: (username: string, email: string, password: string, picture?: string) => Promise<void>;
+    logout: () => Promise<void>;
+};
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+    const[isAuthenticated, setIsAuthenticated] = useState(false);
+
+    const login = async (email: string, password: string) => {
+        const response = await loginRequest(email, password);
+        const token = response.data.access_token;
+        console.log('TOKEN:', token);
+        await AsyncStorage.setItem('token', token);
+        setIsAuthenticated(true);
+    };
+
+    const register = async(
+        username: string,
+        email: string,
+        password: string,
+        picture?: string,
+    ) => {
+        const response = await registerRequest(
+            {
+                username,
+                email,
+                password,
+                picture
+            }
+        );
+
+        const token = response.data.access_token;
+
+        await AsyncStorage.setItem('token', token);
+        setIsAuthenticated(true);
+    };
+
+    const logout = async () => {
+        await AsyncStorage.removeItem('token');
+        setIsAuthenticated(false);
+    }
+
+    return (
+        <AuthContext.Provider value={ { isAuthenticated, login, register, logout } } >
+            {children}
+        </AuthContext.Provider>
+    )
+};
+
+export const useAuth = (): AuthContextType => {
+    const authContextCheck = useContext(AuthContext);
+    if(!authContextCheck){
+        throw new Error('useAuth() must be used inside an AuthProvider');
+    } 
+    return authContextCheck;
+
+}
+

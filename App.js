@@ -1,12 +1,26 @@
 import { StatusBar } from 'expo-status-bar';
+import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { AuthProvider } from './context/AuthContext';
+import RegisterScreen from './screens/RegisterScreen';
+import LoginScreen from './screens/LoginScreen';
+
 export default function App() {
+  const [showRegister, setShowRegister] = useState(false);
+
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <AuthProvider>
+      <View>
+        {showRegister ? (
+          <RegisterScreen />
+        ) : (
+          <LoginScreen onCreateAccount={() => setShowRegister(true)} />
+        )
+        }
+      </View>
+    </AuthProvider>
   );
 }
 
