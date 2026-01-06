@@ -12,7 +12,7 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <View>
+      <View style={styles.container}>
         {showRegister ? (
           <RegisterScreen />
         ) : (
@@ -27,8 +27,5 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

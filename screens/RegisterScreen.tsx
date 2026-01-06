@@ -1,6 +1,7 @@
 import { JSX, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Alert, View, Text, TextInput, Button, ActivityIndicator } from "react-native";
+import { Alert, View, Text, TextInput, Button, ActivityIndicator, StyleSheet, Pressable } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function RegisterScreen(): JSX.Element {
     const { register } = useAuth();
@@ -27,45 +28,100 @@ export default function RegisterScreen(): JSX.Element {
     };
 
     return (
-        <View>
-            <Text>Create your account</Text>
+        <LinearGradient
+            colors={['#1DA1F2', '#0F4C75']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.loginContainer}
+        >
+            <View style={styles.form}>
+                <Text style={styles.title}>Create your account</Text>
 
-            <View>
-                <Text>Username</Text>
-                <TextInput
-                    placeholder="Enter username"
-                    value={username}
-                    onChangeText={setUsername}
-                    autoCapitalize="none"
-                />
+                <View style={styles.field}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Enter username"
+                        value={username}
+                        onChangeText={setUsername}
+                        autoCapitalize="none"
+                    />
+                </View>
+
+                <View style={styles.field}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Enter email"
+                        value={email}
+                        onChangeText={setEmail}
+                        autoCapitalize="none"
+                        keyboardType="email-address"
+                    />
+                </View>
+
+                <View style={styles.field}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Enter password"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                    />
+                </View>
+                <View style={styles.buttonsColumn}>
+                    {loading ? (
+                        <ActivityIndicator />
+                    ) : (
+                        <Pressable style={styles.primaryButton} onPress={handleRegister}>
+                            <Text style={styles.primaryButtonText}>Register</Text>
+                        </Pressable>
+                    )}
+                </View>
             </View>
-
-            <View>
-                <Text>Email</Text>
-                <TextInput
-                    placeholder="Enter email"
-                    value={email}
-                    onChangeText={setEmail}
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                />
-            </View>
-
-            <View>
-                <Text>Password</Text>
-                <TextInput
-                    placeholder="Enter password"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                />
-            </View>
-
-            {loading ? (
-                <ActivityIndicator />
-            ) : (
-                <Button title="Register" onPress={handleRegister} />
-            )}
-        </View>
+        </LinearGradient>
     );
 }
+
+const styles = StyleSheet.create({
+    loginContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    form: {
+        width: '70%',
+    },
+    title: {
+        alignSelf: 'flex-start',
+        fontSize: 24,
+        fontWeight: '600',
+        marginBottom: 24,
+    },
+    field: {
+        marginBottom: 12,
+    },
+    buttonsColumn: {
+        marginTop: 24,
+    },
+    primaryButton: {
+        backgroundColor: '#1DA1F2',
+        paddingVertical: 14,
+        borderRadius: 999,
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    primaryButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 10,
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        fontSize: 16,
+        marginBottom: 12,
+        backgroundColor: '#fff',
+    },
+});
