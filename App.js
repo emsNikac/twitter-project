@@ -1,31 +1,29 @@
-import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import AuthStack from './navigation/AuthStack';
+import AppStack from './navigation/AppStack';
+import { StyleSheet, View } from 'react-native';
 
-import { AuthProvider } from './context/AuthContext';
-import RegisterScreen from './screens/RegisterScreen';
-import LoginScreen from './screens/LoginScreen';
+function RootNavigator() {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <AppStack /> : <AuthStack />;
+}
 
 export default function App() {
-  const [showRegister, setShowRegister] = useState(false);
-
-
   return (
     <AuthProvider>
-      <View style={styles.container}>
-        {showRegister ? (
-          <RegisterScreen />
-        ) : (
-          <LoginScreen onCreateAccount={() => setShowRegister(true)} />
-        )
-        }
+      <View style={styles.root}>
+        <NavigationContainer>
+          <RootNavigator />
+        </NavigationContainer>
       </View>
     </AuthProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-  },
+    backgroundColor: '#0F4C75',
+  }
 });

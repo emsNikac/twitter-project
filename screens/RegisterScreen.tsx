@@ -1,9 +1,14 @@
-import { JSX, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Alert, View, Text, TextInput, Button, ActivityIndicator, StyleSheet, Pressable } from "react-native";
+import { Alert, View, Text, TextInput, ActivityIndicator, StyleSheet, Pressable } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { AuthStackParamList } from "../navigation/AuthStack";
+import Colors from "../constants/colors";
 
-export default function RegisterScreen(): JSX.Element {
+type Props =  NativeStackScreenProps<AuthStackParamList, 'Register'>
+
+export default function RegisterScreen({ navigation }: Props) {
     const { register } = useAuth();
 
     const [username, setUsername] = useState<string>('');
@@ -29,7 +34,7 @@ export default function RegisterScreen(): JSX.Element {
 
     return (
         <LinearGradient
-            colors={['#1DA1F2', '#0F4C75']}
+            colors={[Colors.primary, Colors.primary]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.loginContainer}
@@ -95,6 +100,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: '600',
         marginBottom: 24,
+        color: Colors.blue100,
     },
     field: {
         marginBottom: 12,
@@ -103,7 +109,7 @@ const styles = StyleSheet.create({
         marginTop: 24,
     },
     primaryButton: {
-        backgroundColor: '#1DA1F2',
+        backgroundColor: Colors.blue100,
         paddingVertical: 14,
         borderRadius: 999,
         alignItems: 'center',
@@ -116,12 +122,12 @@ const styles = StyleSheet.create({
     },
     input: {
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: Colors.gray,
         borderRadius: 10,
         paddingHorizontal: 16,
         paddingVertical: 14,
         fontSize: 16,
         marginBottom: 12,
-        backgroundColor: '#fff',
+        backgroundColor: 'white',
     },
 });

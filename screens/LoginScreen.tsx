@@ -2,14 +2,14 @@ import { JSX, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Alert, View, Text, TextInput, ActivityIndicator, StyleSheet, Pressable } from 'react-native';
 import { LinearGradient } from "expo-linear-gradient";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { AuthStackParamList } from "../navigation/AuthStack";
+import Colors from "../constants/colors";
 
-type LoginScreenProps = {
-    onCreateAccount: () => void;
-};
+type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
-export default function LoginScreen({
-    onCreateAccount,
-}: LoginScreenProps): JSX.Element {
+
+export default function LoginScreen({ navigation }: Props) {
     const { login } = useAuth();
 
     const [email, setEmail] = useState<string>('');
@@ -32,9 +32,10 @@ export default function LoginScreen({
         }
     };
 
+    // '#1DA1F2', '#0F4C75' 
     return (
         <LinearGradient
-            colors={['#1DA1F2', '#0F4C75']}
+            colors={[Colors.primary, Colors.primary]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.loginContainer}
@@ -71,7 +72,7 @@ export default function LoginScreen({
                         </Pressable>
                     )}
 
-                    <Pressable style={styles.secondaryButton} onPress={onCreateAccount}>
+                    <Pressable style={styles.secondaryButton} onPress={() => navigation.navigate('Register')}>
                         <Text style={styles.secondaryButtonText}>Create account</Text>
                     </Pressable>
                 </View>
@@ -91,6 +92,7 @@ const styles = StyleSheet.create({
     },
     title: {
         alignSelf: 'flex-start',
+        color: Colors.blue100,
         fontSize: 24,
         fontWeight: '600',
         marginBottom: 24,
@@ -102,7 +104,7 @@ const styles = StyleSheet.create({
         marginTop: 24,
     },
     primaryButton: {
-        backgroundColor: '#1DA1F2',
+        backgroundColor: Colors.blue100,
         paddingVertical: 14,
         borderRadius: 999,
         alignItems: 'center',
@@ -115,24 +117,24 @@ const styles = StyleSheet.create({
     },
     secondaryButton: {
         borderWidth: 1,
-        borderColor: '#1DA1F2',
+        borderColor: Colors.blue100,
         paddingVertical: 14,
         borderRadius: 999,
         alignItems: 'center',
     },
     secondaryButtonText: {
-        color: '#1DA1F2',
+        color: Colors.blue100,
         fontSize: 16,
         fontWeight: '600',
     },
     input: {
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: Colors.gray,
         borderRadius: 10,
         paddingHorizontal: 16,
         paddingVertical: 14,
         fontSize: 16,
         marginBottom: 12,
-        backgroundColor: '#fff',
+        backgroundColor: 'white',
     },
 });
