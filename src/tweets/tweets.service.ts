@@ -1,19 +1,29 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Tweet } from './interface/tweet.interface';
 import { randomUUID } from 'crypto';
+import { UsersService } from 'src/users/users.service';
+
+export type TweetWithCreator = Tweet & {
+    creator: {
+        id: string,
+        username: string,
+        picture: string | null;
+    };
+};
 
 @Injectable()
 export class TweetsService {
+    constructor(private readonly usersService: UsersService){}
     private tweets: Tweet[] = [];
 
-    create(creatorId: string, content: string, image?: string | null): Tweet{
+    create(creatorId: string, content: string, picture?: string | null): Tweet{
         const now = new Date();
 
         const newTweet: Tweet = {
             id: randomUUID(),
-            creatorId: creatorId,
-            content: content,
-            image: image ?? null,
+            creatorId,
+            content,
+            picture: picture ?? null,
             likesCount: 0,
             retweetsCount: 0,
             createdAt: now,
@@ -22,6 +32,18 @@ export class TweetsService {
 
         this.tweets.push(newTweet);
         return newTweet;
+    }
+
+    private toTweetWithCreator(tweet: Tweet): TweetWithCreator{
+        const user = this.usersService.findPublicUserById(tweet.creatorId);
+        return {
+            ...tweet,
+            creator: {
+                id: tweet.creatorId,
+                username: user?.username ?? 'unknown',
+                picture: user?.picture ?? 'null',
+            },
+        };
     }
 
     findAll(): Tweet[]{

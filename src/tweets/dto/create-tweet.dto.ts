@@ -8,6 +8,6 @@ export class CreateTweetDto{
 
     @IsOptional()
     @IsString()
-    image?: string;
+    picture?: string;
 
 }

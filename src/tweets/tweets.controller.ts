@@ -14,7 +14,7 @@ export class TweetsController {
         return this.tweetService.create(
             req.user.id,
             tweetDto.content,
-            tweetDto.image,
+            tweetDto.picture,
         );
     }
 

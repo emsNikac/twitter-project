@@ -37,8 +37,24 @@ export class UsersService {
         return this.users.find(u => u.username.toLowerCase() === username.toLowerCase());
     }
 
-    async create(dto: CreateUserDto): Promise<Omit<User, 'passwordHashed'>>{
-        if(this.findByEmail(dto.email)){
+    // za tweet display
+    findPublicUserById(id: string): {
+        id: string;
+        username: string;
+        picture: string | null;
+    } | null {
+        const user = this.users.find(u => u.id === id);
+        if (!user) return null;
+
+        return {
+            id: user.id,
+            username: user.username,
+            picture: user.picture,
+        };
+    }
+
+    async create(dto: CreateUserDto): Promise<Omit<User, 'passwordHashed'>> {
+        if (this.findByEmail(dto.email)) {
             throw new ConflictException("Email already exists");
         }
 
