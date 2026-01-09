@@ -1,4 +1,4 @@
-import { JSX, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Alert, View, Text, TextInput, ActivityIndicator, StyleSheet, Pressable } from 'react-native';
 import { LinearGradient } from "expo-linear-gradient";

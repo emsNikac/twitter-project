@@ -1,26 +1,32 @@
 import { api } from './client';
 
-export type TweetFeedItem = {
+export type TweetDTO = {
   id: string;
-  creatorId: string;
   content: string;
-  image: string | null;
+  picture: string | null;
+
   likesCount: number;
   retweetsCount: number;
+  isLikedByMe: boolean;
+  isRetweetedByMe: boolean;
+
   createdAt: string;
-  updatedAt?: string;
-  author: {
+
+  creator: {
     id: string;
     username: string;
     picture: string | null;
   };
 };
 
-export const getFeedRequest = () => {
-  return api.get<TweetFeedItem[]>('/tweets');
-};
+export const getFeedRequest = () =>
+  api.get<TweetDTO[]>('/tweets');
 
-export const likeTweetRequest = (id: string) => api.post(`/tweets/${id}/like`);
-export const unlikeTweetRequest = (id: string) => api.post(`/tweets/${id}/dislike`);
-export const retweetRequest = (id: string) => api.post(`/tweets/${id}/retweet`);
-export const undoRetweetRequest = (id: string) => api.post(`/tweets/${id}/undoretweet`);
+export const createTweetRequest = (content: string) =>
+  api.post<TweetDTO>('/tweets', { content });
+
+export const toggleLikeRequest = (id: string) =>
+  api.post<TweetDTO>(`/tweets/${id}/like`);
+
+export const toggleRetweetRequest = (id: string) =>
+  api.post<TweetDTO>(`/tweets/${id}/retweet`);

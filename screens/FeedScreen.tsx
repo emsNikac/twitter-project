@@ -1,37 +1,71 @@
-import React from 'react';
-import { View, Image, StyleSheet, Pressable, StatusBar, Platform } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Image, StyleSheet, Pressable, StatusBar, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import XLogo from '../components/XLogo';
+import XLogo from '../components/icons/XLogo';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { AppStackParamList } from '../navigation/AppStack';
+import { FlatList } from 'react-native';
+import { useTweets } from '../context/TweetsContext';
+import TweetCard from '../components/TweetCard';
+import Colors from '../constants/colors';
 
 const avatarImg = require('../assets/images/default-profile.png');
 
-export default function FeedScreen() {
+type Props = NativeStackScreenProps<AppStackParamList, 'Feed'>;
+
+
+export default function FeedScreen({ navigation }: Props) {
+  const { tweets, loadTweets } = useTweets();
+
+  useEffect(() => {
+    loadTweets();
+  }, []);
+
   return (
-    <View>
+    <View style={styles.root}>
       <StatusBar barStyle="light-content" backgroundColor="black" />
-      <SafeAreaView style={styles.safe} edges={['top']}>
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={styles.header}>
-          
-          {/* Left: profile circle */}
+
           <Pressable onPress={() => { }} style={styles.avatarBtn}>
-            <Image source={avatarImg} style={styles.avatar}/>
+            <Image source={avatarImg} style={styles.avatar} />
           </Pressable>
 
-          {/* Center: X logo */}
           <View style={styles.logoCenter}>
-            <XLogo size={30} color="#fff" />
+            <XLogo size={30} color="white" />
           </View>
         </View>
       </SafeAreaView>
 
-      {/* screen body */}
-      <View style={styles.body} />
+      <FlatList
+        data={tweets}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{ paddingBottom: 120 }}
+        renderItem={({ item }) => <TweetCard tweet={item} />}
+      />
+
+      <Pressable
+        onPress={() => navigation.navigate('CreatePost')}
+        style={({ pressed }) => [
+          styles.fab,
+          pressed && styles.fabPressed,
+        ]}
+        android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: true }}
+      >
+        <Text style={styles.fabPlus}>＋</Text>
+      </Pressable>
+
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safe: {
+  root: {
+    flex: 1,
+    backgroundColor: 'black',
+    position: 'relative',
+  },
+  safeArea: {
     backgroundColor: 'black',
   },
   header: {
@@ -59,10 +93,41 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    alignItems: 'center', 
+    alignItems: 'center',
   },
   body: {
     flex: 1,
     backgroundColor: 'black',
+  },
+  fab: {
+    position: 'absolute',
+    right: 18,
+    bottom: 18 + 16,
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: Colors.blue100,
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    // shadow (iOS)
+    shadowColor: 'black',
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 6 },
+
+    // elevation (Android)
+    elevation: 6,
+  },
+  fabPressed: {
+    transform: [{ scale: 0.98 }],
+    opacity: 0.95,
+  },
+  fabPlus: {
+    color: 'white',
+    fontSize: 27,
+    lineHeight: 34,
+    fontWeight: '600',
+    marginTop: -2,
   },
 });

@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import AuthStack from './navigation/AuthStack';
 import AppStack from './navigation/AppStack';
 import { StyleSheet, View } from 'react-native';
+import { TweetsProvider } from './context/TweetsContext';
 
 function RootNavigator() {
   const { isAuthenticated } = useAuth();
@@ -13,9 +14,11 @@ export default function App() {
   return (
     <AuthProvider>
       <View style={styles.root}>
-        <NavigationContainer>
-          <RootNavigator />
-        </NavigationContainer>
+        <TweetsProvider>
+          <NavigationContainer>
+            <RootNavigator />
+          </NavigationContainer>
+        </TweetsProvider>
       </View>
     </AuthProvider>
   );
