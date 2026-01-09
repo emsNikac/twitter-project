@@ -12,7 +12,7 @@ type Props = NativeStackScreenProps<AppStackParamList, 'ViewUser'>;
 const defaultAvatar = require("../assets/images/default-profile.png");
 
 export default function ViewUserScreen({ route, navigation }: Props) {
-    const { userId: authUserId } = useAuth();
+    const { userId: authUserId, user } = useAuth();
     const { tweets } = useTweets();
 
     const viewedUserId = route.params.userId;
@@ -22,7 +22,9 @@ export default function ViewUserScreen({ route, navigation }: Props) {
         return tweets.filter((tweet) => tweet.creator?.id === viewedUserId);
     }, [tweets, viewedUserId]);
 
-    const profile = userTweets[0]?.creator;
+    const profile = isMe
+        ? user
+        : userTweets[0]?.creator;
 
     return (
         <View style={styles.root}>
@@ -45,7 +47,7 @@ export default function ViewUserScreen({ route, navigation }: Props) {
                 />
 
                 <View style={styles.rightCol}>
-                    <Pressable style={styles.actionBtn}>
+                    <Pressable style={styles.actionBtn} onPress={() => navigation.navigate('EditProfile')}>
                         <Text style={styles.actionText}>{isMe ? "Edit profile" : "Follow"}</Text>
                     </Pressable>
                 </View>
