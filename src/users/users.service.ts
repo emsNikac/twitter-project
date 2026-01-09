@@ -37,7 +37,6 @@ export class UsersService {
         return this.users.find(u => u.username.toLowerCase() === username.toLowerCase());
     }
 
-    // za tweet display
     findPublicUserById(id: string): {
         id: string;
         username: string;
@@ -91,6 +90,17 @@ export class UsersService {
 
         this.users.push(newUser);
         return newUser;
+    }
+
+    updateUser(userId: string, updates: Partial<User>){
+        const user = this.users.find(u => u.id === userId);
+        if(!user) throw new NotFoundException(`User with id ${userId} not found`);
+
+        Object.assign(user, updates);
+        user.updatedAt = new Date();
+
+        const {passwordHashed, ...cleanUser } = user;
+        return cleanUser;
     }
 
 }

@@ -28,7 +28,7 @@ export class TweetsService {
     constructor(private readonly usersService: UsersService) { }
     private tweets: Tweet[] = [];
 
-    create(creatorId: string, content: string, picture?: string | null): Tweet {
+    create(creatorId: string, content: string, picture?: string | null) {
         const now = new Date();
 
         const newTweet: Tweet = {
@@ -43,7 +43,7 @@ export class TweetsService {
         };
 
         this.tweets.push(newTweet);
-        return newTweet;
+        return this.toTweetWithCreator(newTweet, creatorId);
     }
 
     private toTweetWithCreator(tweet: Tweet, viewerId?: string): TweetWithCreator {

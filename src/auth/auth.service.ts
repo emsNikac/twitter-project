@@ -19,7 +19,7 @@ export class AuthService {
     }
 
     async validateUser(email: string, password: string){
-        const user = this.usersService.findByEmail(email);
+        const user = await this.usersService.findByEmail(email);
         if(!user) return null;
 
         const check_password = await  bcrypt.compare(password, user.passwordHashed);
@@ -38,8 +38,8 @@ export class AuthService {
         return this.jwtService.signAsync({sub: userId, email});
     }
 
-    getUserFromTokenPayload(payload: { sub: string; email: string }){
-        const user = this.usersService.findByEmail(payload.email);
+    async getUserFromTokenPayload(payload: { sub: string; email: string }){
+        const user = await this.usersService.findByEmail(payload.email);
         if(!user || user.id !== payload.sub) throw new UnauthorizedException();
         const {passwordHashed: _, ...cleanUser} = user;
         return cleanUser; 
