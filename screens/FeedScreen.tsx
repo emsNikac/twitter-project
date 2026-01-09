@@ -8,6 +8,7 @@ import { FlatList } from 'react-native';
 import { useTweets } from '../context/TweetsContext';
 import TweetCard from '../components/TweetCard';
 import Colors from '../constants/colors';
+import { useAuth } from "../context/AuthContext";
 
 const avatarImg = require('../assets/images/default-profile.png');
 
@@ -16,6 +17,7 @@ type Props = NativeStackScreenProps<AppStackParamList, 'Feed'>;
 
 export default function FeedScreen({ navigation }: Props) {
   const { tweets, loadTweets } = useTweets();
+  const { userId } = useAuth();
 
   useEffect(() => {
     loadTweets();
@@ -27,7 +29,11 @@ export default function FeedScreen({ navigation }: Props) {
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={styles.header}>
 
-          <Pressable onPress={() => { }} style={styles.avatarBtn}>
+          {/* userId should be dynamic */}
+          <Pressable onPress={() => {
+            if (!userId) return;
+            navigation.navigate("ViewUser", { userId });
+          }} style={styles.avatarBtn}>
             <Image source={avatarImg} style={styles.avatar} />
           </Pressable>
 

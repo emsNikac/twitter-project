@@ -1,10 +1,12 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import FeedScreen from '../screens/FeedScreen';
 import CreatePostScreen from '../screens/CreatePostScreen';
+import ViewUserScreen from '../screens/ViewUserScreen';
 
 export type AppStackParamList = {
   Feed: undefined;
   CreatePost: undefined;
+  ViewUser: { userId: string };
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -23,6 +25,11 @@ export default function AppStack() {
         options={{ presentation: 'modal', headerShown: false, }}
       />
 
+      <Stack.Screen
+        name="ViewUser"
+        component={ViewUserScreen}
+        options={{ headerShown: false }}
+      />
 
     </Stack.Navigator>
   );
