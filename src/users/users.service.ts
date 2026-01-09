@@ -42,14 +42,14 @@ export class UsersService {
         id: string;
         username: string;
         picture: string | null;
-    } | null {
+    } {
         const user = this.users.find(u => u.id === id);
-        if (!user) return null;
+        if (!user) throw new NotFoundException(`User with id ${id} not found`);
 
         return {
             id: user.id,
             username: user.username,
-            picture: user.picture,
+            picture: user.picture ?? null,
         };
     }
 

@@ -3,8 +3,8 @@ export interface Tweet {
     creatorId: string;
     content: string;
     picture: string | null;
-    likesCount: number;
-    retweetsCount: number;
+    likes: Set<string>;
+    retweets: Set<string>;
     createdAt: Date;
     updatedAt?: Date;
 }

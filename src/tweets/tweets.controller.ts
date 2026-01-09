@@ -5,50 +5,40 @@ import { CreateTweetDto } from './dto/create-tweet.dto';
 
 @Controller('tweets')
 export class TweetsController {
-    constructor(private readonly tweetService: TweetsService){}
+    constructor(private readonly tweetsService: TweetsService){}
 
 
     @UseGuards(JwtAuthGuard)
     @Post()
     create(@Req() req: any, @Body() tweetDto: CreateTweetDto){
-        return this.tweetService.create(
+        return this.tweetsService.create(
             req.user.id,
             tweetDto.content,
             tweetDto.picture,
         );
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get()
-    findAll(){
-        return this.tweetService.findAll();
+    findAll(@Req() req){
+        return this.tweetsService.findAll(req.user.id);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get(':id')
-    findOne(@Param('id') id: string){
-        return this.tweetService.findOne(id);
+    findOne(@Req() req: any, @Param('id') id: string) {
+        return this.tweetsService.findOne(id, req.user.id);
     }
 
     @UseGuards(JwtAuthGuard)
     @Post(':id/like')
-    likeTweet(@Param('id') id: string){
-        return this.tweetService.increaseLikes(id);
-    }
-
-    @UseGuards(JwtAuthGuard)
-    @Post(':id/dislike')
-    dislike(@Param('id') id: string){
-        return this.tweetService.decreaseLikes(id);
+    toggleLike(@Req() req: any, @Param('id') id: string) {
+        return this.tweetsService.toggleLike(id, req.user.id);
     }
 
     @UseGuards(JwtAuthGuard)
     @Post(':id/retweet')
-    retweet(@Param('id') id: string){
-        return this.tweetService.increaseRetweets(id);
-    }
-
-    @UseGuards(JwtAuthGuard)
-    @Post(':id/undoretweet')
-    undoRetweet(@Param('id') id: string){
-        return this.tweetService.decreaseRetweets(id);
+    toggleRetweet(@Req() req: any, @Param('id') id: string) {
+        return this.tweetsService.toggleRetweet(id, req.user.id);
     }
 }
