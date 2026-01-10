@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { View, Image, StyleSheet, Pressable, StatusBar, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import XLogo from '../components/icons/XLogo';
@@ -9,6 +9,7 @@ import { useTweets } from '../context/TweetsContext';
 import TweetCard from '../components/TweetCard';
 import Colors from '../constants/colors';
 import { useAuth } from "../context/AuthContext";
+import { useFocusEffect } from '@react-navigation/native';
 
 const avatarImg = require('../assets/images/default-profile.png');
 
@@ -19,17 +20,17 @@ export default function FeedScreen({ navigation }: Props) {
   const { tweets, loadTweets } = useTweets();
   const { userId } = useAuth();
 
-  useEffect(() => {
-    loadTweets();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadTweets();
+    }, [])
+  );
 
   return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" backgroundColor="black" />
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={styles.header}>
-
-          {/* userId should be dynamic */}
           <Pressable onPress={() => {
             if (!userId) return;
             navigation.navigate("ViewUser", { userId });
