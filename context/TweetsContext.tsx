@@ -1,5 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { createTweetRequest, getFeedRequest, toggleLikeRequest, toggleRetweetRequest, TweetDTO } from "../api/tweets.api";
+import {
+  createTweetRequest,
+  getFeedRequest,
+  toggleLikeRequest,
+  toggleRetweetPointerRequest,
+  TweetDTO,
+} from "../api/tweets.api";
 import { useAuth } from "./AuthContext";
 
 export type Tweet = TweetDTO;
@@ -9,7 +15,7 @@ type TweetsContextType = {
   loadTweets: () => Promise<void>;
   createTweet: (content: string) => Promise<void>;
   toggleLike: (id: string) => Promise<void>;
-  toggleRetweet: (id: string) => Promise<void>;
+  toggleRetweet: (originalId: string) => Promise<void>;
 };
 
 const TweetsContext = createContext<TweetsContextType | null>(null);
@@ -39,27 +45,44 @@ export function TweetsProvider({ children }: { children: React.ReactNode }) {
 
 
   const loadTweets = async () => {
-    const res = await getFeedRequest();
-    setTweets(res.data);
+    const result = await getFeedRequest();
+    setTweets(result.data);
   };
 
   const createTweet = async (content: string) => {
-    const res = await createTweetRequest(content);
-    setTweets(prev => [res.data, ...prev]);
+    const result = await createTweetRequest(content);
+    setTweets(prev => [result.data, ...prev]);
   };
 
   const toggleLike = async (id: string) => {
-    const res = await toggleLikeRequest(id);
+    const result = await toggleLikeRequest(id);
+    const updated = result.data;
+
     setTweets(prev =>
-      prev.map(t => (t.id === id ? res.data : t))
+      prev.map(tweet => {
+        if (tweet.id === updated.id) {
+          return updated;
+        }
+
+        if (
+          tweet.type === 'RETWEET' &&
+          tweet.originalTweet?.id === updated.id
+        ) {
+          return {
+            ...tweet,
+            likesCount: updated.likesCount,
+            isLikedByMe: updated.isLikedByMe,
+          };
+        }
+
+        return tweet;
+      })
     );
   };
 
-  const toggleRetweet = async (id: string) => {
-    const res = await toggleRetweetRequest(id);
-    setTweets(prev =>
-      prev.map(t => (t.id === id ? res.data : t))
-    );
+  const toggleRetweet = async (originalId: string) => {
+    await toggleRetweetPointerRequest(originalId);
+    await loadTweets();
   };
 
   return (
@@ -72,7 +95,7 @@ export function TweetsProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useTweets() {
-    const tweetContext = useContext(TweetsContext);
-    if(!tweetContext) throw new Error('useTweets must be used inside TweetsProvider');
-    return tweetContext;
+  const tweetContext = useContext(TweetsContext);
+  if (!tweetContext) throw new Error('useTweets must be used inside TweetsProvider');
+  return tweetContext;
 }

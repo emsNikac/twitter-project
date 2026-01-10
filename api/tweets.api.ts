@@ -2,8 +2,21 @@ import { api } from './client';
 
 export type TweetDTO = {
   id: string;
-  content: string;
-  picture: string | null;
+  type: 'ORIGINAL' | 'RETWEET';
+
+  content?: string;
+  picture?: string | null;
+
+  originalTweet?: {
+    id: string;
+    content: string;
+    picture: string | null;
+    creator: {
+      id: string;
+      username: string;
+      picture: string | null;
+    };
+  };
 
   likesCount: number;
   retweetsCount: number;
@@ -28,5 +41,5 @@ export const createTweetRequest = (content: string) =>
 export const toggleLikeRequest = (id: string) =>
   api.post<TweetDTO>(`/tweets/${id}/like`);
 
-export const toggleRetweetRequest = (id: string) =>
-  api.post<TweetDTO>(`/tweets/${id}/retweet`);
+export const toggleRetweetPointerRequest = (originalId: string) =>
+  api.post(`/tweets/${originalId}/retweet-toggle`);
