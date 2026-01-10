@@ -37,8 +37,8 @@ export class TweetsController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Post(':id/retweet')
-    toggleRetweet(@Req() req: any, @Param('id') id: string) {
-        return this.tweetsService.toggleRetweet(id, req.user.id);
+    @Post(':id/retweet-toggle')
+    toggleRetweetPointer(@Req() req: any, @Param('id') id: string) {
+        return this.tweetsService.toggleRetweetPointer(id, req.user.id);
     }
 }

@@ -1,12 +1,25 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Tweet } from './interface/tweet.interface';
 import { randomUUID } from 'crypto';
 import { UsersService } from 'src/users/users.service';
 
 export type TweetWithCreator = {
     id: string;
-    content: string;
-    picture: string | null;
+    type: 'ORIGINAL' | 'RETWEET',
+
+    content?: string;
+    picture?: string | null;
+
+    originalTweet?: {
+        id: string;
+        content: string;
+        picture: string | null;
+        creator: {
+            id: string;
+            username: string;
+            picture: string | null;
+        };
+    };
 
     likesCount: number;
     retweetsCount: number;
@@ -34,8 +47,11 @@ export class TweetsService {
         const newTweet: Tweet = {
             id: randomUUID(),
             creatorId,
+
+            type: 'ORIGINAL',
             content,
             picture: picture ?? null,
+
             likes: new Set(),
             retweets: new Set(),
             createdAt: now,
@@ -47,34 +63,126 @@ export class TweetsService {
     }
 
     private toTweetWithCreator(tweet: Tweet, viewerId?: string): TweetWithCreator {
-        const user = this.usersService.findPublicUserById(tweet.creatorId);
+        const creator = this.usersService.findPublicUserById(tweet.creatorId);
+
+        if (tweet.type === 'RETWEET') {
+            const original = this.findRaw(tweet.originalTweetId!);
+            const originalCreator = this.usersService.findPublicUserById(original.creatorId);
+
+            return {
+                id: tweet.id,
+                type: 'RETWEET',
+
+                createdAt: tweet.createdAt,
+                updatedAt: tweet.updatedAt,
+
+                likesCount: original.likes.size,
+                retweetsCount: original.retweets.size,
+                isLikedByMe: viewerId ? original.likes.has(viewerId) : false,
+                isRetweetedByMe: viewerId ? original.retweets.has(viewerId) : false,
+
+                creator: {
+                    id: creator.id,
+                    username: creator.username,
+                    picture: creator.picture ?? null,
+                },
+
+                originalTweet: {
+                    id: original.id,
+                    content: original.content!,
+                    picture: original.picture,
+                    creator: {
+                        id: originalCreator.id,
+                        username: originalCreator.username,
+                        picture: originalCreator.picture ?? null,
+                    },
+                },
+            };
+        }
+
         return {
             id: tweet.id,
-            content: tweet.content,
+            type: 'ORIGINAL',
+
+            content: tweet.content!,
             picture: tweet.picture,
+
             createdAt: tweet.createdAt,
             updatedAt: tweet.updatedAt,
 
             likesCount: tweet.likes.size,
             retweetsCount: tweet.retweets.size,
-
             isLikedByMe: viewerId ? tweet.likes.has(viewerId) : false,
             isRetweetedByMe: viewerId ? tweet.retweets.has(viewerId) : false,
 
             creator: {
-                id: user?.id ?? 'unknown',
-                username: user?.username ?? 'unknown',
-                picture: user?.picture,
+                id: creator?.id ?? 'unknown',
+                username: creator?.username ?? 'unknown',
+                picture: creator?.picture,
             },
         };
     }
 
+    toggleRetweetPointer(originalTweetId: string, userId: string): TweetWithCreator {
+        const original = this.findRaw(originalTweetId);
+
+        if (original.type !== 'ORIGINAL') throw new BadRequestException('Retweet target must be an ORIGINAL tweet');
+        if (original.creatorId === userId) throw new BadRequestException('You cannot retweet your own tweet');
+
+        const alreadyRetweeted = original.retweets.has(userId);
+
+        if (alreadyRetweeted) {
+            original.retweets.delete(userId);
+            original.updatedAt = new Date();
+
+            this.deleteMyRetweetPost(originalTweetId, userId);
+        } else {
+            original.retweets.add(userId);
+            original.updatedAt = new Date();
+
+            const now = new Date();
+            const retweet: Tweet = {
+                id: randomUUID(),
+                creatorId: userId,
+
+                type: 'RETWEET',
+                originalTweetId,
+
+                content: null,
+                picture: null,
+
+                likes: new Set(),
+                retweets: new Set(),
+
+                createdAt: now,
+                updatedAt: now,
+            };
+
+            this.tweets.push(retweet);
+        }
+
+        return this.toTweetWithCreator(original, userId);
+    }
+
+    private deleteMyRetweetPost(originalTweetId: string, userId: string) {
+        const index = this.tweets.findIndex(
+            tweet =>
+                tweet.type === 'RETWEET' &&
+                tweet.creatorId === userId &&
+                tweet.originalTweetId === originalTweetId,
+        );
+
+        if (index !== -1) {
+            this.tweets.splice(index, 1);
+        }
+    }
+    
     findAll(viewerId?: string): TweetWithCreator[] {
         return this.tweets
             .sort((tweet_a, tweet_b) => tweet_b.createdAt.getTime() - tweet_a.createdAt.getTime())
             .map(tweet => this.toTweetWithCreator(tweet, viewerId));
     }
-
+    
     private findRaw(id: string): Tweet {
         const tweet = this.tweets.find(t => t.id === id);
         if (!tweet) {
@@ -99,18 +207,4 @@ export class TweetsService {
         tweet.updatedAt = new Date();
         return this.toTweetWithCreator(tweet, userId);
     }
-
-    toggleRetweet(tweetId: string, userId: string): TweetWithCreator {
-        const tweet = this.findRaw(tweetId);
-
-        if (tweet.retweets.has(userId)) {
-            tweet.retweets.delete(userId);
-        } else {
-            tweet.retweets.add(userId);
-        }
-
-        tweet.updatedAt = new Date();
-        return this.toTweetWithCreator(tweet, userId);
-    }
-
 }
