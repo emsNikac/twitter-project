@@ -6,4 +6,22 @@ export type UpdateUserPayload = {
   bio?: string; //TODO
 };
 
-export const updateMeRequest = (payload: UpdateUserPayload) => api.patch('/users/me', payload);
+export type PublicProfile = {
+  id: string;
+  username: string;
+  picture: string | null;
+
+  followersCount: number;
+  followingCount: number;
+  isFollowedByMe: boolean;
+};
+
+export const updateMeRequest = (payload: UpdateUserPayload) => 
+  api.patch('/users/me', payload);
+
+export const getUserProfileRequest = (userId: string) =>
+  api.get<PublicProfile>(`/users/${userId}/profile`);
+
+export const toggleFollowRequest = (userId: string) => {
+  return api.post<PublicProfile>(`/users/${userId}/follow`);
+}

@@ -2,29 +2,45 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AppStackParamList } from "../navigation/AppStack";
 import { useAuth } from "../context/AuthContext";
 import { useTweets } from "../context/TweetsContext";
-import { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Image, Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
 import Colors from "../constants/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TweetCard from "../components/TweetCard";
+import { getUserProfileRequest, PublicProfile, toggleFollowRequest } from "../api/users.api";
+import { useFocusEffect } from "@react-navigation/native";
 
 type Props = NativeStackScreenProps<AppStackParamList, 'ViewUser'>;
 const defaultAvatar = require("../assets/images/default-profile.png");
 
 export default function ViewUserScreen({ route, navigation }: Props) {
-    const { userId: authUserId, user } = useAuth();
+    const { userId: authUserId } = useAuth();
     const { tweets } = useTweets();
+
+    const [profile, setProfile] = useState<PublicProfile | null>(null);
 
     const viewedUserId = route.params.userId;
     const isMe = viewedUserId === authUserId;
+
+    useFocusEffect(
+        React.useCallback(() => {
+            (async () => {
+                const result = await getUserProfileRequest(viewedUserId);
+                setProfile(result.data);
+            })();
+        }, [viewedUserId])
+    );
 
     const userTweets = useMemo(() => {
         return tweets.filter((tweet) => tweet.creator?.id === viewedUserId);
     }, [tweets, viewedUserId]);
 
-    const profile = isMe
-        ? user
-        : userTweets[0]?.creator;
+    if (!profile) return null;
+
+    const handleToggleFollow = async () => {
+        const result = await toggleFollowRequest(viewedUserId);
+        setProfile(result.data);
+    };
 
     return (
         <View style={styles.root}>
@@ -47,22 +63,40 @@ export default function ViewUserScreen({ route, navigation }: Props) {
                 />
 
                 <View style={styles.rightCol}>
-                    <Pressable style={styles.actionBtn} onPress={() => navigation.navigate('EditProfile')}>
-                        <Text style={styles.actionText}>{isMe ? "Edit profile" : "Follow"}</Text>
-                    </Pressable>
+                    {isMe ? (
+                        <Pressable
+                            style={styles.actionBtn}
+                            onPress={() => navigation.navigate("EditProfile")}
+                        >
+                            <Text style={styles.actionText}>Edit profile</Text>
+                        </Pressable>
+                    ) : (
+                        <Pressable
+                            style={styles.actionBtn}
+                            onPress={handleToggleFollow}
+                        >
+                            <Text style={styles.actionText}>
+                                {profile?.isFollowedByMe ? "Unfollow" : "Follow"}
+                            </Text>
+                        </Pressable>
+                    )}
                 </View>
             </View>
 
             <Text style={styles.username}>
-                {profile?.username ? `@${profile.username}` : "@unknown"}
+                @{profile.username}
             </Text>
 
             <View style={styles.followRow}>
                 <Text style={styles.followText}>
-                    <Text style={styles.followBold}>0</Text> Following
+                    <Text style={styles.followBold}>
+                        {profile?.followingCount ?? 0}
+                    </Text> Following
                 </Text>
                 <Text style={styles.followText}>
-                    <Text style={styles.followBold}>0</Text> Followers
+                    <Text style={styles.followBold}>
+                        {profile?.followersCount ?? 0}
+                    </Text> Followers
                 </Text>
             </View>
 

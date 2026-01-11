@@ -2,17 +2,14 @@ import { createContext, useContext, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
 
-import { updateMeRequest } from '../api/users.api';
+import { PublicProfile, updateMeRequest } from '../api/users.api';
 import { loginRequest, registerRequest, getMeRequest } from '../api/auth.api';
 
 type JwtPayload = {
     sub: string;
 };
 
-type User = {
-    id: string;
-    username: string;
-    picture?: string | null;
+type User = PublicProfile & {
     bio?: string;
 };
 
@@ -20,6 +17,7 @@ type AuthContextType = {
     isAuthenticated: boolean;
     userId: string | null;
     user: User | null;
+    refreshMe: () => Promise<void>;
     login: (email: string, password: string) => Promise<void>;
     register: (username: string, email: string, password: string, picture?: string) => Promise<void>;
     updateMe: (payload: Partial<User>) => Promise<void>;
@@ -38,6 +36,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const updatedUser = res.data;
 
         setUser(updatedUser);
+    };
+
+    const refreshMe = async () => {
+        const result = await getMeRequest();
+        setUser(result.data);
     };
 
 
@@ -89,7 +92,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, userId, user, login, register, updateMe, logout }} >
+        <AuthContext.Provider value={{ isAuthenticated, userId, user, refreshMe, login, register, updateMe, logout }} >
             {children}
         </AuthContext.Provider>
     )
