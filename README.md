@@ -24,7 +24,7 @@ Make sure you have the following installed:
 - Node.js (v18+ recommended)
 - npm or yarn
 - Expo CLI
-- Android Studio (Android emulator) or a physical device
+- Android Studio (Android emulator), iOS emulator or a physical device
 - Git
 
 ---
