@@ -18,14 +18,12 @@ type Props = NativeStackScreenProps<AppStackParamList, 'Feed'>;
 
 export default function FeedScreen({ navigation }: Props) {
   const { tweets, loadTweets } = useTweets();
-  const { userId } = useAuth();
+  const { userId, logout } = useAuth();
 
   useFocusEffect(
     useCallback(() => {
-      if (tweets.length === 0) {
-        loadTweets();
-      }
-    }, [tweets.length])
+      loadTweets();
+    }, [])
   );
 
   return (
@@ -43,6 +41,10 @@ export default function FeedScreen({ navigation }: Props) {
           <View style={styles.logoCenter}>
             <XLogo size={30} color="white" />
           </View>
+
+          <Pressable onPress={logout}>
+            <Text style={styles.logout}>Logout</Text>
+          </Pressable>
         </View>
       </SafeAreaView>
 
@@ -82,10 +84,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between', 
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#222',
-    backgroundColor: 'black',
-    position: 'relative',
   },
   avatarBtn: {
     width: 55,
@@ -103,6 +104,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: 'center',
+  },
+  logout: {
+    color: Colors.blue100,
+    fontSize: 14,
+    fontWeight: '600',
   },
   fab: {
     position: 'absolute',
