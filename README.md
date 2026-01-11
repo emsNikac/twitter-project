@@ -1,97 +1,117 @@
-Twitter Clone (Mobile + API)
+# Twitter Clone (Mobile + API)
 
-A simplified Twitter/X clone built as a learning project, featuring
-authentication, tweets, likes, retweets, and follow/unfollow
-functionality.
+A simplified Twitter/X clone built as a learning project, featuring authentication, tweets, likes, retweets, and follow/unfollow functionality.
 
-------------------------------------------------------------------------
+---
 
-Project Structure
+## Project Structure
 
-This repository contains both the backend API and the mobile
-application:
+This repository contains both the backend API and the mobile application in a single monorepo-style structure:
 
--   twitter-backend/ – NestJS REST API
--   twitter-mobile/ – React Native (Expo) mobile app
+- **twitter-backend/** – NestJS REST API  
+- **twitter-mobile/** – React Native (Expo) mobile app  
 
-The mobile app communicates with the backend via a REST API secured
-using JWT authentication.
+The mobile app communicates with the backend via a REST API secured using JWT authentication.
 
-------------------------------------------------------------------------
+---
 
-Running the Project Locally
+## Running the Project Locally
 
-Requirements
+### Requirements
 
--   Node.js (v18+ recommended)
--   npm or yarn
--   Expo CLI
--   Android Studio or physical device
--   Git
+Make sure you have the following installed:
 
-------------------------------------------------------------------------
+- Node.js (v18+ recommended)
+- npm or yarn
+- Expo CLI
+- Android Studio (Android emulator) or a physical device
+- Git
 
-Backend (NestJS API)
+---
 
-    cd twitter-backend
-    npm install
-    npm run start:dev
+## Backend (NestJS API)
 
-The backend will start on: http://localhost:3000
+```bash
+cd twitter-backend
+npm install
+npm run start:dev
+```
+---
+The backend will start on:
+http://localhost:3000
 
-Backend responsibilities: - User authentication (JWT) - User profiles -
-Follow / unfollow users - Tweets, likes, and retweets - Feed generation
+Backend Responsibilities
+- User authentication (JWT)
+- User profiles
+- 	Follow / unfollow users
+- 	 weets, likes, and retweets
+- 	 Feed generation
 
-Note: In-memory storage only (no database).
+Note: The backend uses in-memory storage (no database).
 
-------------------------------------------------------------------------
+---
 
-Mobile App (React Native + Expo)
+## Mobile App (React Native + Expo)
+```bash
+cd twitter-mobile
+npm install
+npx expo start
+```
+Then:
+- Press a to open the Android emulator
+- Press i to open the iOS emulator
+- Or scan the QR code with Expo Go on your phone
 
-    cd twitter-mobile
-    npm install
-    npx expo start
+### Android Emulator Networking
 
-Then: - Press a to open Android emulator or i to open iOS emulator - Or scan QR code with Expo Go
+- When running on an Android emulator, the app uses http://10.0.2.2:3000 to access the local backend.
 
-Android emulator networking: http://10.0.2.2:3000
+---
 
-------------------------------------------------------------------------
+## Architecture Overview
 
-Architecture Overview
+### Backend Architecture
+- NestJS modular architecture
+- Controllers, services, DTOs
+- JWT authentication
+- REST API
 
-Backend
 
--   NestJS modular architecture
--   Controllers, services, DTOs
--   JWT authentication
--   REST API
+### Mobile Architecture
+- React Native + Expo
+- Context API (AuthContext, TweetsContext)
+- Axios API layer
+- React Navigation
+- Clear separation of Screens, Components, API logic, Context
 
-Mobile
 
--   React Native + Expo
--   Context API (AuthContext, TweetsContext)
--   Axios API layer
--   React Navigation
--   Clear separation of Screens, Components, API logic, Context 
+---
 
-------------------------------------------------------------------------
+## Features
+- User authentication
+- Tweets, likes, retweets
+- Follow & unfollow users
+- User profiles with followers/following count
+- Feed with retweets and engagement state
+- Logout functionality
 
-Features
+## Technologies Used
+### Backend
+- NestJS
+- TypeScript
+- Node.js
+- JWT
+- bcrypt
 
--   User authentication
--   Tweets, likes, retweets
--   Follow / unfollow users
--   User profiles
--   Feed with engagement state
--   Logout
+### Mobile
+- React Native
+- Expo
+- TypeScript
+- Axios
+- React Navigation
 
-------------------------------------------------------------------------
 
-Technologies Used
 
-Backend: - NestJS - TypeScript - Node.js - JWT - bcrypt
 
-Mobile: - React Native - Expo - TypeScript - Axios - React Navigation
 
-------------------------------------------------------------------------
+
