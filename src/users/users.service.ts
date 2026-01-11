@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { User } from './interface/users.interface';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -84,8 +84,12 @@ export class UsersService {
             email: data.email,
             passwordHashed: data.passwordHashed,
             picture: data.picture ?? null,
+
             createdAt: now,
             updatedAt: now,
+
+            followers: new Set(),
+            following: new Set(),
         };
 
         this.users.push(newUser);
@@ -101,6 +105,42 @@ export class UsersService {
 
         const {passwordHashed, ...cleanUser } = user;
         return cleanUser;
+    }
+
+    getPublicProile(targetUserId: string, viewerId?: string){
+        const user = this.users.find(user => user.id === targetUserId);
+        if(!user) throw new NotFoundException('User not found;');
+
+        return {
+            id: user.id,
+            username: user.username,
+            picture: user.picture,
+
+            followersCount: user.followers.size,
+            followingCount: user.following.size,
+            isFollowedByMe: viewerId ? user.followers.has(viewerId) : false,
+        };
+    }
+
+    toggleFollow(targetUserId: string, viewerId: string){
+        if (targetUserId === viewerId) throw new BadRequestException('You cannot follow yourself');
+
+        const target = this.users.find(user => user.id === targetUserId);
+        const viewer = this.users.find(user => user.id === viewerId);
+
+        if(!target || !viewer) throw new NotFoundException('User not found');
+
+        if(viewer.following.has(targetUserId)){
+            viewer.following.delete(targetUserId);
+            target.followers.delete(viewerId);
+        } else {
+            viewer.following.add(targetUserId);
+            target.followers.add(viewerId);
+        }
+        viewer.updatedAt = new Date();
+        target.updatedAt = new Date();
+
+        return this.getPublicProile(targetUserId, viewerId);
     }
 
 }

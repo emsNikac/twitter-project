@@ -24,4 +24,16 @@ export class UsersController {
     updateMe(@Req() req: any, @Body() body: UpdateUserDto) {
         return this.usersService.updateUser(req.user.id, body);
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Get(':id/profile')
+    getProfile(@Req() req: any, @Param('id') id: string){
+        return this.usersService.getPublicProile(id, req.user.id);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post(':id/follow')
+    toggleFollow(@Req() req: any, @Param('id') id: string){
+        return this.usersService.toggleFollow(id, req.user.id);
+    }
 }

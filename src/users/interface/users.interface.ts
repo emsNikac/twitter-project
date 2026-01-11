@@ -4,6 +4,10 @@ export interface User{
     email: string;
     passwordHashed: string;
     picture: string | null;
+
+    followers: Set<string>;
+    following: Set<string>;
+
     createdAt: Date;
     updatedAt?: Date;
 }
