@@ -52,7 +52,7 @@ Mobile App (React Native + Expo)
     npm install
     npx expo start
 
-Then: - Press a to open Android emulator - Or scan QR code with Expo Go
+Then: - Press a to open Android emulator or i to open iOS emulator - Or scan QR code with Expo Go
 
 Android emulator networking: http://10.0.2.2:3000
 
@@ -73,6 +73,7 @@ Mobile
 -   Context API (AuthContext, TweetsContext)
 -   Axios API layer
 -   React Navigation
+-   Clear separation of Screens, Components, API logic, Context 
 
 ------------------------------------------------------------------------
 
