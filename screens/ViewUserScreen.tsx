@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AppStackParamList } from "../navigation/AppStack";
 import { useAuth } from "../context/AuthContext";
 import { useTweets } from "../context/TweetsContext";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { FlatList, Image, Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
 import Colors from "../constants/colors";
 import { SafeAreaView } from "react-native-safe-area-context";

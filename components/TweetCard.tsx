@@ -13,24 +13,26 @@ import { useAuth } from '../context/AuthContext';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
-function buildVirtualOriginalTweet(retweet: Tweet): Tweet {
-    if (!retweet.originalTweet) throw new Error('RETWEET without originalTweet');
+function normalizeTweet(tweet: Tweet): Tweet {
+    if (tweet.type !== 'RETWEET' || !tweet.originalTweet) {
+        return tweet;
+    }
 
     return {
-        id: retweet.originalTweet.id,
+        id: tweet.originalTweet.id,
         type: 'ORIGINAL',
 
-        content: retweet.originalTweet.content,
-        picture: retweet.originalTweet.picture,
+        content: tweet.originalTweet.content,
+        picture: tweet.originalTweet.picture,
 
-        creator: retweet.originalTweet.creator,
+        creator: tweet.originalTweet.creator,
 
-        likesCount: retweet.likesCount,
-        retweetsCount: retweet.retweetsCount,
-        isLikedByMe: retweet.isLikedByMe,
-        isRetweetedByMe: retweet.isRetweetedByMe,
+        likesCount: tweet.likesCount,
+        retweetsCount: tweet.retweetsCount,
+        isLikedByMe: tweet.isLikedByMe,
+        isRetweetedByMe: tweet.isRetweetedByMe,
 
-        createdAt: retweet.createdAt,
+        createdAt: tweet.createdAt,
     };
 }
 
@@ -39,18 +41,13 @@ export default function TweetCard({ tweet }: { tweet: Tweet }) {
     const navigation = useNavigation<NavigationProp>();
     const { userId } = useAuth();
 
-    const isOwnTweet = tweet.creator?.id === userId;
+    const baseTweet = normalizeTweet(tweet);
 
-    const originalId =
-        tweet.type === 'RETWEET' && tweet.originalTweet
-            ? tweet.originalTweet.id
-            : tweet.id;
+    const originalId = baseTweet.id;
+    const isOwnTweet = baseTweet.creator.id === userId;
 
-    const isRetweeted =
-        tweet.type === 'RETWEET' ? true : tweet.isRetweetedByMe;
-
-    const engagement =
-        tweet.type === 'RETWEET' && tweet.originalTweet
+    const engagementState =
+        tweet.type === 'RETWEET'
             ? {
                 likesCount: tweet.likesCount,
                 retweetsCount: tweet.retweetsCount,
@@ -60,7 +57,7 @@ export default function TweetCard({ tweet }: { tweet: Tweet }) {
             : tweet;
 
     const goToProfile = () => {
-        navigation.navigate('ViewUser', { userId: tweet.creator.id });
+        navigation.navigate('ViewUser', { userId: baseTweet.creator.id });
     };
 
     if (tweet.type === 'RETWEET' && tweet.originalTweet) {
@@ -70,7 +67,7 @@ export default function TweetCard({ tweet }: { tweet: Tweet }) {
                     {tweet.creator.username} retweeted
                 </Text>
 
-                <TweetCard tweet={buildVirtualOriginalTweet(tweet)} />
+                <TweetCard tweet={baseTweet} />
             </View>
         );
     }
@@ -80,8 +77,8 @@ export default function TweetCard({ tweet }: { tweet: Tweet }) {
             <Pressable onPress={goToProfile}>
                 <Image
                     source={
-                        tweet.creator.picture
-                            ? { uri: tweet.creator.picture }
+                        baseTweet.creator.picture
+                            ? { uri: baseTweet.creator.picture }
                             : require('../assets/images/default-profile.png')
                     }
                     style={styles.avatar}
@@ -92,23 +89,24 @@ export default function TweetCard({ tweet }: { tweet: Tweet }) {
                 <View style={styles.headerRow}>
                     <Pressable onPress={goToProfile}>
                         <Text style={styles.username}>
-                            @{tweet.creator.username}
+                            @{baseTweet.creator.username}
                         </Text>
                     </Pressable>
+
                     <Text style={styles.tweetTime}>
-                        · {timeAgo(tweet.createdAt)}
+                        · {timeAgo(baseTweet.createdAt)}
                     </Text>
                 </View>
 
-                <Text style={styles.text}>{tweet.content}</Text>
+                <Text style={styles.text}>{baseTweet.content}</Text>
 
                 <View style={styles.actions}>
                     <CommentsIcon size={20} />
 
                     <Pressable onPress={() => toggleLike(originalId)}>
-                        <LikeIcon filled={engagement.isLikedByMe} />
+                        <LikeIcon filled={engagementState.isLikedByMe} />
                         <Text style={{ color: Colors.dirtyWhite }}>
-                            {engagement.likesCount}
+                            {engagementState.likesCount}
                         </Text>
                     </Pressable>
 
@@ -117,9 +115,9 @@ export default function TweetCard({ tweet }: { tweet: Tweet }) {
                         onPress={() => toggleRetweet(originalId)}
                         style={{ opacity: isOwnTweet ? 0.4 : 1 }}
                     >
-                        <RetweetIcon filled={isRetweeted} />
+                        <RetweetIcon filled={engagementState.isRetweetedByMe} />
                         <Text style={{ color: Colors.dirtyWhite }}>
-                            {engagement.retweetsCount}
+                            {engagementState.retweetsCount}
                         </Text>
                     </Pressable>
                 </View>

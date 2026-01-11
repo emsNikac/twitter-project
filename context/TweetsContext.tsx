@@ -3,7 +3,7 @@ import {
   createTweetRequest,
   getFeedRequest,
   toggleLikeRequest,
-  toggleRetweetPointerRequest,
+  toggleRetweetRequest,
   TweetDTO,
 } from "../api/tweets.api";
 import { useAuth } from "./AuthContext";
@@ -54,34 +54,30 @@ export function TweetsProvider({ children }: { children: React.ReactNode }) {
     setTweets(prev => [result.data, ...prev]);
   };
 
+  const replaceTweet =
+    (updated: Tweet) => (tweet: Tweet) => {
+      if (tweet.id === updated.id) return updated;
+      if (
+        tweet.type === 'RETWEET' &&
+        tweet.originalTweet?.id === updated.id
+      ) {
+        return {
+          ...tweet,
+          likesCount: updated.likesCount,
+          isLikedByMe: updated.isLikedByMe,
+        };
+      }
+
+      return tweet;
+    };
+
   const toggleLike = async (id: string) => {
     const result = await toggleLikeRequest(id);
-    const updated = result.data;
-
-    setTweets(prev =>
-      prev.map(tweet => {
-        if (tweet.id === updated.id) {
-          return updated;
-        }
-
-        if (
-          tweet.type === 'RETWEET' &&
-          tweet.originalTweet?.id === updated.id
-        ) {
-          return {
-            ...tweet,
-            likesCount: updated.likesCount,
-            isLikedByMe: updated.isLikedByMe,
-          };
-        }
-
-        return tweet;
-      })
-    );
+    setTweets(prev => prev.map(replaceTweet(result.data)));
   };
 
   const toggleRetweet = async (originalId: string) => {
-    await toggleRetweetPointerRequest(originalId);
+    await toggleRetweetRequest(originalId);
     await loadTweets();
   };
 

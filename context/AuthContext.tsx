@@ -31,35 +31,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [userId, setUserId] = useState<string | null>(null);
     const [user, setUser] = useState<User | null>(null);
 
-    const updateMe = async (payload: Partial<User>) => {
-        const res = await updateMeRequest(payload);
-        const updatedUser = res.data;
-
-        setUser(updatedUser);
-    };
-
-    const refreshMe = async () => {
+    const loadMe = async () => {
         const result = await getMeRequest();
         setUser(result.data);
+    }
+    
+    const refreshMe = async () => {
+        await loadMe();
     };
 
+    const updateMe = async (payload: Partial<User>) => {
+        const result = await updateMeRequest(payload);
+        setUser(result.data);
+    };
 
     const login = async (email: string, password: string) => {
         const response = await loginRequest(email, password);
         const token = response.data.access_token;
-
+        
         await AsyncStorage.setItem('token', token);
-
+        
         const decoded = jwtDecode<JwtPayload>(token);
         setUserId(decoded.sub);
         setIsAuthenticated(true);
 
-        try {
-            const myData = await getMeRequest();
-            setUser(myData.data);
-        } catch (err) {
-            console.warn('Failed to load user profile after login', err);
-        }
+        await loadMe();
     };
 
     const register = async (
@@ -77,19 +73,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUserId(decoded.sub);
         setIsAuthenticated(true);
 
-        try {
-            const myData = await getMeRequest();
-            setUser(myData.data);
-        } catch (error) {
-            console.warn('Failed to load user profile after register', error);
-        }
+        await loadMe();
     };
 
     const logout = async () => {
         await AsyncStorage.removeItem('token');
         setUserId(null);
+        setUser(null);
         setIsAuthenticated(false);
     }
+
 
     return (
         <AuthContext.Provider value={{ isAuthenticated, userId, user, refreshMe, login, register, updateMe, logout }} >

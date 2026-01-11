@@ -41,5 +41,5 @@ export const createTweetRequest = (content: string) =>
 export const toggleLikeRequest = (id: string) =>
   api.post<TweetDTO>(`/tweets/${id}/like`);
 
-export const toggleRetweetPointerRequest = (originalId: string) =>
+export const toggleRetweetRequest = (originalId: string) =>
   api.post(`/tweets/${originalId}/retweet-toggle`);

@@ -22,8 +22,10 @@ export default function FeedScreen({ navigation }: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      loadTweets();
-    }, [])
+      if (tweets.length === 0) {
+        loadTweets();
+      }
+    }, [tweets.length])
   );
 
   return (
@@ -102,10 +104,6 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
   },
-  body: {
-    flex: 1,
-    backgroundColor: 'black',
-  },
   fab: {
     position: 'absolute',
     right: 18,
@@ -117,13 +115,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
 
-    // shadow (iOS)
     shadowColor: 'black',
     shadowOpacity: 0.3,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 6 },
 
-    // elevation (Android)
     elevation: 6,
   },
   fabPressed: {

@@ -16,12 +16,12 @@ export type PublicProfile = {
   isFollowedByMe: boolean;
 };
 
-export const updateMeRequest = (payload: UpdateUserPayload) => 
-  api.patch('/users/me', payload);
 
 export const getUserProfileRequest = (userId: string) =>
   api.get<PublicProfile>(`/users/${userId}/profile`);
 
-export const toggleFollowRequest = (userId: string) => {
-  return api.post<PublicProfile>(`/users/${userId}/follow`);
-}
+export const toggleFollowRequest = (userId: string) =>
+  api.post<PublicProfile>(`/users/${userId}/follow`);
+
+export const updateMeRequest = (payload: UpdateUserPayload) => 
+  api.patch('/users/me', payload);

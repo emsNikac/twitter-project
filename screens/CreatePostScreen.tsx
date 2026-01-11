@@ -10,6 +10,11 @@ export default function CreatePostScreen({ navigation }: any) {
 
     const checkPost = content.trim().length > 0;
 
+    const handlePost = async () => {
+        await createTweet(content);
+        navigation.goBack();
+    };
+
     return (
         <View style={styles.root}>
             <StatusBar barStyle="dark-content" backgroundColor="white" />
@@ -23,7 +28,7 @@ export default function CreatePostScreen({ navigation }: any) {
                     <Pressable
                         disabled={!checkPost}
                         style={[styles.postBtn, !checkPost && styles.postBtnDisabled]}
-                        onPress={async () => { await createTweet(content); navigation.goBack(); }} 
+                        onPress={handlePost} 
                     >
                         <Text style={styles.postText}>Post</Text>
                     </Pressable>
